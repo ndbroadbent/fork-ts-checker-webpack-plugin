@@ -2,7 +2,7 @@ import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
-import * as ts from 'typescript';
+import { OperationCanceledException } from './OperationCanceledException';
 
 interface CancellationTokenData {
   isCancelled: boolean;
@@ -54,7 +54,7 @@ export class CancellationToken {
 
   throwIfCancellationRequested() {
     if (this.isCancellationRequested()) {
-      throw new ts.OperationCanceledException();
+      throw new OperationCanceledException();
     }
   }
 

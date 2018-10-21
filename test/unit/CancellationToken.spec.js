@@ -1,7 +1,6 @@
 var describe = require('mocha').describe;
 var it = require('mocha').it;
 var os = require('os');
-var ts = require('typescript');
 var fs = require('fs');
 var beforeEach = require('mocha').beforeEach;
 var afterEach = require('mocha').afterEach;
@@ -9,6 +8,8 @@ var expect = require('chai').expect;
 var mockFs = require('mock-fs');
 var CancellationToken = require('../../lib/CancellationToken')
   .CancellationToken;
+var OperationCanceledException = require('../../lib/OperationCanceledException')
+  .OperationCanceledException;
 
 describe('[UNIT] CancellationToken', function() {
   beforeEach(function() {
@@ -63,7 +64,7 @@ describe('[UNIT] CancellationToken', function() {
     );
   });
 
-  it('should throw ts.OperationCanceledException error on cancelled', function() {
+  it('should throw OperationCanceledException error on cancelled', function() {
     var tokenA = new CancellationToken();
     expect(function() {
       tokenA.throwIfCancellationRequested();
@@ -72,7 +73,7 @@ describe('[UNIT] CancellationToken', function() {
     var tokenB = new CancellationToken('rgeer#R23r$#T$3t#$t43', true);
     expect(function() {
       tokenB.throwIfCancellationRequested();
-    }).to.throw(ts.OperationCanceledException);
+    }).to.throw(OperationCanceledException);
   });
 
   it('should write file in filesystem on requestCancellation', function() {

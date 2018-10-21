@@ -1,8 +1,8 @@
 import * as process from 'process';
-import * as ts from 'typescript';
 import { IncrementalChecker } from './IncrementalChecker';
 import { CancellationToken } from './CancellationToken';
 import { NormalizedMessage } from './NormalizedMessage';
+import { OperationCanceledException } from './OperationCanceledException';
 
 const checker = new IncrementalChecker(
   process.env.TSCONFIG,
@@ -27,7 +27,7 @@ function run(cancellationToken: CancellationToken) {
       lints = checker.getLints(cancellationToken);
     }
   } catch (error) {
-    if (error instanceof ts.OperationCanceledException) {
+    if (error instanceof OperationCanceledException) {
       return;
     }
 
