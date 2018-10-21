@@ -3,6 +3,7 @@ import * as path from 'path';
 import * as ts from 'typescript';
 import { FilesRegister } from './FilesRegister';
 import { FilesWatcher } from './FilesWatcher';
+import { ScriptKind, TypeScriptInstance } from './TypeScriptInstance';
 // tslint:disable-next-line
 import * as vueCompiler from 'vue-template-compiler';
 
@@ -12,15 +13,15 @@ interface ResolvedScript {
 }
 
 export class VueProgram {
-  static loadProgramConfig(configFile: string, compilerOptions: object) {
+  static loadProgramConfig(typescript: TypeScriptInstance, configFile: string, compilerOptions: object) {
     const extraExtensions = ['vue'];
 
     const parseConfigHost: ts.ParseConfigHost = {
-      fileExists: ts.sys.fileExists,
-      readFile: ts.sys.readFile,
-      useCaseSensitiveFileNames: ts.sys.useCaseSensitiveFileNames,
+      fileExists: typescript.sys.fileExists,
+      readFile: typescript.sys.readFile,
+      useCaseSensitiveFileNames: typescript.sys.useCaseSensitiveFileNames,
       readDirectory: (rootDir, extensions, excludes, includes, depth) => {
-        return ts.sys.readDirectory(
+        return typescript.sys.readDirectory(
           rootDir,
           extensions.concat(extraExtensions),
           excludes,
@@ -30,7 +31,7 @@ export class VueProgram {
       }
     };
 
-    const tsconfig = ts.readConfigFile(configFile, ts.sys.readFile).config;
+    const tsconfig = typescript.readConfigFile(configFile, typescript.sys.readFile).config;
 
     tsconfig.compilerOptions = tsconfig.compilerOptions || {};
     tsconfig.compilerOptions = {
@@ -38,7 +39,7 @@ export class VueProgram {
       ...compilerOptions
     };
 
-    const parsed = ts.parseJsonConfigFileContent(
+    const parsed = typescript.parseJsonConfigFileContent(
       tsconfig,
       parseConfigHost,
       path.dirname(configFile)
@@ -107,13 +108,14 @@ export class VueProgram {
   }
 
   static createProgram(
+    typescript: TypeScriptInstance,
     programConfig: ts.ParsedCommandLine,
     basedir: string,
     files: FilesRegister,
     watcher: FilesWatcher,
     oldProgram: ts.Program
   ) {
-    const host = ts.createCompilerHost(programConfig.options);
+    const host = typescript.createCompilerHost(programConfig.options);
     const realGetSourceFile = host.getSourceFile;
 
     // We need a host that can parse Vue SFCs (single file components).
@@ -142,7 +144,7 @@ export class VueProgram {
       // get typescript contents from Vue file
       if (source && VueProgram.isVue(filePath)) {
         const resolved = VueProgram.resolveScriptBlock(source.text);
-        source = ts.createSourceFile(
+        source = typescript.createSourceFile(
           filePath,
           resolved.content,
           languageVersion,
@@ -160,7 +162,7 @@ export class VueProgram {
 
       for (const moduleName of moduleNames) {
         // Try to use standard resolution.
-        const { resolvedModule } = ts.resolveModuleName(
+        const { resolvedModule } = typescript.resolveModuleName(
           moduleName,
           containingFile,
           programConfig.options,
@@ -226,7 +228,7 @@ export class VueProgram {
       return resolvedModules;
     };
 
-    return ts.createProgram(
+    return typescript.createProgram(
       programConfig.fileNames,
       programConfig.options,
       host,
@@ -236,14 +238,14 @@ export class VueProgram {
 
   private static getScriptKindByLang(lang: string) {
     if (lang === 'ts') {
-      return ts.ScriptKind.TS;
+      return ScriptKind.TS;
     } else if (lang === 'tsx') {
-      return ts.ScriptKind.TSX;
+      return ScriptKind.TSX;
     } else if (lang === 'jsx') {
-      return ts.ScriptKind.JSX;
+      return ScriptKind.JSX;
     } else {
       // when lang is "js" or no lang specified
-      return ts.ScriptKind.JS;
+      return ScriptKind.JS;
     }
   }
 
@@ -269,7 +271,7 @@ export class VueProgram {
     // No <script> block
     if (!script) {
       return {
-        scriptKind: ts.ScriptKind.JS,
+        scriptKind: ScriptKind.JS,
         content: '/* tslint:disable */\nexport default {};\n'
       };
     }

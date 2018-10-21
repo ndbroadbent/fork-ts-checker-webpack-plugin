@@ -10,42 +10,7 @@ import { NormalizedMessage } from './NormalizedMessage';
 import { CancellationToken } from './CancellationToken';
 import * as minimatch from 'minimatch';
 import { VueProgram } from './VueProgram';
-
-interface TypeScriptInstance {
-  parseJsonConfigFileContent(
-    json: any,
-    host: ts.ParseConfigHost,
-    basePath: string,
-    existingOptions?: ts.CompilerOptions,
-    configFileName?: string,
-    resolutionStack?: ts.Path[],
-    extraFileExtensions?: ReadonlyArray<ts.FileExtensionInfo>
-  ): ts.ParsedCommandLine;
-  readConfigFile(
-    fileName: string,
-    readFile: (path: string) => string | undefined
-  ): {
-    config?: any;
-    error?: ts.Diagnostic;
-  };
-  createCompilerHost(
-    options: ts.CompilerOptions,
-    setParentNodes?: boolean
-  ): ts.CompilerHost;
-  createProgram(
-    rootNames: ReadonlyArray<string>,
-    options: ts.CompilerOptions,
-    host?: ts.CompilerHost,
-    oldProgram?: ts.Program,
-    configFileParsingDiagnostics?: ReadonlyArray<ts.Diagnostic>
-  ): ts.Program;
-  flattenDiagnosticMessageText(
-    messageText: string | ts.DiagnosticMessageChain | undefined,
-    newLine: string
-  ): string;
-
-  sys: ts.System;
-}
+import { TypeScriptInstance } from './TypeScriptInstance';
 
 // Need some augmentation here - linterOptions.exclude is not (yet) part of the official
 // types for tslint.
@@ -246,11 +211,13 @@ export class IncrementalChecker {
     this.programConfig =
       this.programConfig ||
       VueProgram.loadProgramConfig(
+        this.typescript,
         this.programConfigFile,
         this.compilerOptions
       );
 
     return VueProgram.createProgram(
+      this.typescript,
       this.programConfig,
       path.dirname(this.programConfigFile),
       this.files,
