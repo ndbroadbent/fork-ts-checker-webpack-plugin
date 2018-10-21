@@ -270,7 +270,12 @@ export class IncrementalChecker {
 
     // normalize and deduplicate diagnostics
     return NormalizedMessage.deduplicate(
-      diagnostics.map(NormalizedMessage.createFromDiagnostic)
+      diagnostics.map(d =>
+        NormalizedMessage.createFromDiagnostic(
+          ts.flattenDiagnosticMessageText,
+          d
+        )
+      )
     );
   }
 

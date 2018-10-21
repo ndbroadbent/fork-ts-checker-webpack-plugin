@@ -1,8 +1,4 @@
-import {
-  Diagnostic,
-  DiagnosticCategory,
-  flattenDiagnosticMessageText
-} from 'typescript';
+import { Diagnostic, DiagnosticMessageChain } from 'typescript';
 import { RuleFailure } from 'tslint';
 
 type ErrorType = 'diagnostic' | 'lint';
@@ -45,7 +41,13 @@ export class NormalizedMessage {
   }
 
   // message types
-  static createFromDiagnostic(diagnostic: Diagnostic) {
+  static createFromDiagnostic(
+    flattenDiagnosticMessageText: (
+      messageText: string | DiagnosticMessageChain | undefined,
+      newLine: string
+    ) => string,
+    diagnostic: Diagnostic
+  ) {
     let file: string;
     let line: number;
     let character: number;
@@ -61,9 +63,10 @@ export class NormalizedMessage {
     return new NormalizedMessage({
       type: NormalizedMessage.TYPE_DIAGNOSTIC,
       code: diagnostic.code,
-      severity: DiagnosticCategory[
-        diagnostic.category
-      ].toLowerCase() as Severity,
+      // TODO: Keep in sync with TypeScript's DiagnosticCategory.Error or pass in
+      severity: (diagnostic.category.toString() === '1'
+        ? NormalizedMessage.SEVERITY_ERROR
+        : NormalizedMessage.SEVERITY_WARNING) as Severity,
       content: flattenDiagnosticMessageText(diagnostic.messageText, '\n'),
       file,
       line,
