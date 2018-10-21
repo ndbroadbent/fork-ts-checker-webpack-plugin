@@ -173,11 +173,23 @@ class ForkTsCheckerWebpackPlugin {
 
     // tslint:disable-next-line:no-implicit-dependencies
     this.typescriptPath = options.typescript || require.resolve('typescript');
-    this.typescriptVersion = require(this.typescriptPath).version;
-    this.tslintVersion = this.tslint
-      ? // tslint:disable-next-line:no-implicit-dependencies
-        require('tslint').Linter.VERSION
-      : undefined;
+    try {
+      this.typescriptVersion = require(this.typescriptPath).version;
+    } catch (_ignored) {
+      throw new Error(
+        'When you use this plugin you must install `typescript`.'
+      );
+    }
+    try {
+      this.tslintVersion = this.tslint
+        ? // tslint:disable-next-line:no-implicit-dependencies
+          require('tslint').Linter.VERSION
+        : undefined;
+    } catch (_ignored) {
+      throw new Error(
+        'When you use `tslint` option, make sure to install `tslint`.'
+      );
+    }
 
     this.vue = options.vue === true; // default false
   }
