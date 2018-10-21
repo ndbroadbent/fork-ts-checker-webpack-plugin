@@ -1,3 +1,4 @@
+// tslint:disable-next-line:no-implicit-dependencies
 import * as ts from 'typescript';
 
 // TODO: keep in sync with TypeScript
@@ -17,51 +18,12 @@ export enum ScriptKind {
 }
 
 export interface TypeScriptInstance {
-  parseJsonConfigFileContent(
-    json: any,
-    host: ts.ParseConfigHost,
-    basePath: string,
-    existingOptions?: ts.CompilerOptions,
-    configFileName?: string,
-    resolutionStack?: ts.Path[],
-    extraFileExtensions?: ReadonlyArray<ts.FileExtensionInfo>
-  ): ts.ParsedCommandLine;
-  readConfigFile(
-    fileName: string,
-    readFile: (path: string) => string | undefined
-  ): {
-    config?: any;
-    error?: ts.Diagnostic;
-  };
-  createCompilerHost(
-    options: ts.CompilerOptions,
-    setParentNodes?: boolean
-  ): ts.CompilerHost;
-  createProgram(
-    rootNames: ReadonlyArray<string>,
-    options: ts.CompilerOptions,
-    host?: ts.CompilerHost,
-    oldProgram?: ts.Program,
-    configFileParsingDiagnostics?: ReadonlyArray<ts.Diagnostic>
-  ): ts.Program;
-  flattenDiagnosticMessageText(
-    messageText: string | ts.DiagnosticMessageChain | undefined,
-    newLine: string
-  ): string;
-  resolveModuleName(
-    moduleName: string,
-    containingFile: string,
-    compilerOptions: ts.CompilerOptions,
-    host: ts.ModuleResolutionHost,
-    cache?: ts.ModuleResolutionCache
-  ): ts.ResolvedModuleWithFailedLookupLocations;
-  createSourceFile(
-    fileName: string,
-    sourceText: string,
-    languageVersion: ts.ScriptTarget,
-    setParentNodes?: boolean,
-    scriptKind?: ts.ScriptKind
-  ): ts.SourceFile;
-
+  parseJsonConfigFileContent: typeof ts.parseJsonConfigFileContent;
+  readConfigFile: typeof ts.readConfigFile;
+  createCompilerHost: typeof ts.createCompilerHost;
+  createProgram: typeof ts.createProgram;
+  flattenDiagnosticMessageText: typeof ts.flattenDiagnosticMessageText;
+  resolveModuleName: typeof ts.resolveModuleName;
+  createSourceFile: typeof ts.createSourceFile;
   sys: ts.System;
 }
