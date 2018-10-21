@@ -45,6 +45,7 @@ export class IncrementalChecker {
   vue: boolean;
 
   constructor(
+    typescriptPath: string,
     programConfigFile: string,
     compilerOptions: object,
     linterConfigFile: string | false,
@@ -54,7 +55,7 @@ export class IncrementalChecker {
     checkSyntacticErrors: boolean,
     vue: boolean
   ) {
-    // TODO: set `typescript`
+    this.typescript = require(typescriptPath);
     this.programConfigFile = programConfigFile;
     this.compilerOptions = compilerOptions;
     this.linterConfigFile = linterConfigFile;

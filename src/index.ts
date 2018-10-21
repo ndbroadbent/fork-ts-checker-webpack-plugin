@@ -72,6 +72,7 @@ class ForkTsCheckerWebpackPlugin {
   static ONE_CPU_FREE = Math.max(1, ForkTsCheckerWebpackPlugin.ALL_CPUS - 1);
   static TWO_CPUS_FREE = Math.max(1, ForkTsCheckerWebpackPlugin.ALL_CPUS - 2);
 
+  typescriptPath: string;
   options: Partial<Options>;
   tsconfig: string;
   compilerOptions: object;
@@ -114,7 +115,7 @@ class ForkTsCheckerWebpackPlugin {
 
   vue: boolean;
 
-  constructor(options?: Partial<Options>) {
+  constructor(typescriptPath?: string | null, options?: Partial<Options>) {
     options = options || ({} as Options);
     this.options = Object.assign({}, options);
 
@@ -169,9 +170,12 @@ class ForkTsCheckerWebpackPlugin {
     this.emitCallback = this.createNoopEmitCallback();
     this.doneCallback = this.createDoneCallback();
 
-    this.typescriptVersion = require('typescript').version;
+    // tslint:disable-next-line:no-implicit-dependencies
+    this.typescriptPath = typescriptPath || require.resolve('typescript');
+    this.typescriptVersion = require(typescriptPath).version;
     this.tslintVersion = this.tslint
-      ? require('tslint').Linter.VERSION
+      ? // tslint:disable-next-line:no-implicit-dependencies
+        require('tslint').Linter.VERSION
       : undefined;
 
     this.vue = options.vue === true; // default false
@@ -563,6 +567,7 @@ class ForkTsCheckerWebpackPlugin {
             ? []
             : ['--max-old-space-size=' + this.memoryLimit],
         env: Object.assign({}, process.env, {
+          TYPESCRIPT_PATH: this.typescriptPath,
           TSCONFIG: this.tsconfigPath,
           COMPILER_OPTIONS: JSON.stringify(this.compilerOptions),
           TSLINT: this.tslintPath || '',

@@ -5,6 +5,7 @@ import { NormalizedMessage } from './NormalizedMessage';
 import { OperationCanceledException } from './OperationCanceledException';
 
 const checker = new IncrementalChecker(
+  process.env.TYPESCRIPT_PATH,
   process.env.TSCONFIG,
   JSON.parse(process.env.COMPILER_OPTIONS),
   process.env.TSLINT === '' ? false : process.env.TSLINT,

@@ -25,5 +25,6 @@ export interface TypeScriptInstance {
   flattenDiagnosticMessageText: typeof ts.flattenDiagnosticMessageText;
   resolveModuleName: typeof ts.resolveModuleName;
   createSourceFile: typeof ts.createSourceFile;
-  sys: ts.System;
+  version: typeof ts.version;
+  sys: typeof ts.sys;
 }
