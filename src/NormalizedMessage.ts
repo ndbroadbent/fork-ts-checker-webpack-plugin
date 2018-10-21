@@ -1,4 +1,6 @@
+// tslint:disable-next-line:no-implicit-dependencies
 import { Diagnostic, DiagnosticMessageChain } from 'typescript';
+// tslint:disable-next-line:no-implicit-dependencies
 import { RuleFailure } from 'tslint';
 
 type ErrorType = 'diagnostic' | 'lint';

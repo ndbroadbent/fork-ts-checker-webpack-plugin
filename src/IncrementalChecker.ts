@@ -1,7 +1,9 @@
 import * as fs from 'fs';
 import endsWith = require('lodash/endsWith');
 import * as path from 'path';
+// tslint:disable-next-line:no-implicit-dependencies
 import * as ts from 'typescript';
+// tslint:disable-next-line:no-implicit-dependencies
 import { Configuration, Linter } from 'tslint'; // Imported for types alone; actual requires take place in methods below
 import { FilesRegister } from './FilesRegister';
 import { FilesWatcher } from './FilesWatcher';
@@ -100,6 +102,7 @@ export class IncrementalChecker {
   }
 
   static loadLinterConfig(configFile: string): ConfigurationFile {
+    // tslint:disable-next-line:no-implicit-dependencies
     const tslint = require('tslint');
 
     return tslint.Configuration.loadConfigurationFromPath(
@@ -149,6 +152,7 @@ export class IncrementalChecker {
   }
 
   static createLinter(program: ts.Program) {
+    // tslint:disable-next-line:no-implicit-dependencies
     const tslint = require('tslint');
 
     return new tslint.Linter({ fix: false }, program);

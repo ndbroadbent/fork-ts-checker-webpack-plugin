@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
+// tslint:disable-next-line:no-implicit-dependencies
 import * as ts from 'typescript';
 import { FilesRegister } from './FilesRegister';
 import { FilesWatcher } from './FilesWatcher';
