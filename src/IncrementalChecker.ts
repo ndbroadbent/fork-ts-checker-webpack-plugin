@@ -11,6 +11,42 @@ import { CancellationToken } from './CancellationToken';
 import * as minimatch from 'minimatch';
 import { VueProgram } from './VueProgram';
 
+interface TypeScriptInstance {
+  parseJsonConfigFileContent(
+    json: any,
+    host: ts.ParseConfigHost,
+    basePath: string,
+    existingOptions?: ts.CompilerOptions,
+    configFileName?: string,
+    resolutionStack?: ts.Path[],
+    extraFileExtensions?: ReadonlyArray<ts.FileExtensionInfo>
+  ): ts.ParsedCommandLine;
+  readConfigFile(
+    fileName: string,
+    readFile: (path: string) => string | undefined
+  ): {
+    config?: any;
+    error?: ts.Diagnostic;
+  };
+  createCompilerHost(
+    options: ts.CompilerOptions,
+    setParentNodes?: boolean
+  ): ts.CompilerHost;
+  createProgram(
+    rootNames: ReadonlyArray<string>,
+    options: ts.CompilerOptions,
+    host?: ts.CompilerHost,
+    oldProgram?: ts.Program,
+    configFileParsingDiagnostics?: ReadonlyArray<ts.Diagnostic>
+  ): ts.Program;
+  flattenDiagnosticMessageText(
+    messageText: string | ts.DiagnosticMessageChain | undefined,
+    newLine: string
+  ): string;
+
+  sys: ts.System;
+}
+
 // Need some augmentation here - linterOptions.exclude is not (yet) part of the official
 // types for tslint.
 interface ConfigurationFile extends Configuration.IConfigurationFile {
@@ -34,6 +70,7 @@ export class IncrementalChecker {
   linterConfig: ConfigurationFile;
   linterExclusions: minimatch.IMinimatch[];
 
+  typescript: TypeScriptInstance;
   program: ts.Program;
   programConfig: ts.ParsedCommandLine;
   watcher: FilesWatcher;
@@ -50,6 +87,7 @@ export class IncrementalChecker {
     checkSyntacticErrors: boolean,
     vue: boolean
   ) {
+    // TODO: set `typescript`
     this.programConfigFile = programConfigFile;
     this.compilerOptions = compilerOptions;
     this.linterConfigFile = linterConfigFile;
@@ -71,8 +109,15 @@ export class IncrementalChecker {
     }));
   }
 
-  static loadProgramConfig(configFile: string, compilerOptions: object) {
-    const tsconfig = ts.readConfigFile(configFile, ts.sys.readFile).config;
+  static loadProgramConfig(
+    typescript: TypeScriptInstance,
+    configFile: string,
+    compilerOptions: object
+  ) {
+    const tsconfig = typescript.readConfigFile(
+      configFile,
+      typescript.sys.readFile
+    ).config;
 
     tsconfig.compilerOptions = tsconfig.compilerOptions || {};
     tsconfig.compilerOptions = {
@@ -80,9 +125,9 @@ export class IncrementalChecker {
       ...compilerOptions
     };
 
-    const parsed = ts.parseJsonConfigFileContent(
+    const parsed = typescript.parseJsonConfigFileContent(
       tsconfig,
-      ts.sys,
+      typescript.sys,
       path.dirname(configFile)
     );
 
@@ -98,12 +143,13 @@ export class IncrementalChecker {
   }
 
   static createProgram(
+    typescript: TypeScriptInstance,
     programConfig: ts.ParsedCommandLine,
     files: FilesRegister,
     watcher: FilesWatcher,
     oldProgram: ts.Program
   ) {
-    const host = ts.createCompilerHost(programConfig.options);
+    const host = typescript.createCompilerHost(programConfig.options);
     const realGetSourceFile = host.getSourceFile;
 
     host.getSourceFile = (filePath, languageVersion, onError) => {
@@ -129,7 +175,7 @@ export class IncrementalChecker {
       return files.getData(filePath).source;
     };
 
-    return ts.createProgram(
+    return typescript.createProgram(
       programConfig.fileNames,
       programConfig.options,
       host,
@@ -217,11 +263,13 @@ export class IncrementalChecker {
     this.programConfig =
       this.programConfig ||
       IncrementalChecker.loadProgramConfig(
+        this.typescript,
         this.programConfigFile,
         this.compilerOptions
       );
 
     return IncrementalChecker.createProgram(
+      this.typescript,
       this.programConfig,
       this.files,
       this.watcher,
@@ -272,7 +320,7 @@ export class IncrementalChecker {
     return NormalizedMessage.deduplicate(
       diagnostics.map(d =>
         NormalizedMessage.createFromDiagnostic(
-          ts.flattenDiagnosticMessageText,
+          this.typescript.flattenDiagnosticMessageText,
           d
         )
       )
