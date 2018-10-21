@@ -39,6 +39,7 @@ interface Logger {
 }
 
 interface Options {
+  typescript?: string;
   tsconfig: string;
   compilerOptions: object;
   tslint: string | true;
@@ -115,7 +116,7 @@ class ForkTsCheckerWebpackPlugin {
 
   vue: boolean;
 
-  constructor(typescriptPath?: string | null, options?: Partial<Options>) {
+  constructor(options?: Partial<Options>) {
     options = options || ({} as Options);
     this.options = Object.assign({}, options);
 
@@ -171,8 +172,8 @@ class ForkTsCheckerWebpackPlugin {
     this.doneCallback = this.createDoneCallback();
 
     // tslint:disable-next-line:no-implicit-dependencies
-    this.typescriptPath = typescriptPath || require.resolve('typescript');
-    this.typescriptVersion = require(typescriptPath).version;
+    this.typescriptPath = options.typescript || require.resolve('typescript');
+    this.typescriptVersion = require(this.typescriptPath).version;
     this.tslintVersion = this.tslint
       ? // tslint:disable-next-line:no-implicit-dependencies
         require('tslint').Linter.VERSION

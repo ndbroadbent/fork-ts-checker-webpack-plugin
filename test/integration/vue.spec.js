@@ -75,6 +75,7 @@ describe('[INTEGRATION] vue', function() {
     };
 
     checker = new IncrementalChecker(
+      require.resolve('typescript'),
       plugin.tsconfigPath,
       {},
       plugin.tslintPath || false,
