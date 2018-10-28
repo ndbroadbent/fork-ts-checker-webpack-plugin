@@ -168,13 +168,17 @@ describe('[UNIT] VueProgram', function() {
 
   describe('loadProgramConfig', function() {
     it('sets allowNonTsExtensions to true on returned options', function() {
-      var result = VueProgram.loadProgramConfig('tsconfig.foo.json', {});
+      var result = VueProgram.loadProgramConfig(
+        require('typescript'),
+        'tsconfig.foo.json',
+        {}
+      );
 
       expect(result.options.allowNonTsExtensions).to.equal(true);
     });
 
     it('merges compilerOptions into config file options', function() {
-      VueProgram.loadProgramConfig('tsconfig.foo.json', {
+      VueProgram.loadProgramConfig(require('typescript'), 'tsconfig.foo.json', {
         bar: false
       });
 
